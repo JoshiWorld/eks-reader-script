@@ -18,6 +18,36 @@ export interface EksChipIdResult {
   decimal: string;
 }
 
+/** Für Client/Server-Actions serialisierbar (ohne Buffer). */
+export interface EksChipIdDto {
+  compact: string;
+  hex: string;
+  decimal: string;
+}
+
+export interface EksComPortInfo {
+  path: string;
+  manufacturer?: string;
+  serialNumber?: string;
+}
+
+export function toChipIdDto(result: EksChipIdResult): EksChipIdDto {
+  return {
+    compact: result.rawBytes.toString("hex").toUpperCase(),
+    hex: result.hex,
+    decimal: result.decimal,
+  };
+}
+
+export async function listEksComPorts(): Promise<EksComPortInfo[]> {
+  const ports = await SerialPort.list();
+  return ports.map((port) => ({
+    path: port.path,
+    manufacturer: port.manufacturer,
+    serialNumber: port.serialNumber,
+  }));
+}
+
 function buildReadCommand(startAddress: number, byteCount: number): Buffer {
   return Buffer.from([
     0x07,
